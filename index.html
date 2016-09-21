@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>测试</title>
+	<script type="text/javascript" src="promise.js"></script>
+	<script type="text/javascript">
+		function run(){
+			this.tabs={};
+			this.start = function(tab){
+				this.tabs[tab]={};
+				this.tabs[tab]['time']= new Date;
+				this.tabs[tab]['index']= 0;
+			}
+			this.tab = function(tab){
+				++this.tabs[tab].index;
+				return (tab+":"+this.tabs[tab].index+" "+(new Date-this.tabs[tab].time)+'ms');
+			}
+		}
+
+		var  r = new run;
+
+		r.start('e');
+		var p = new Promise(function(resolve, reject) {
+			console.log(r.tab('e'));
+			console.log("执行顺序：1");
+			//resolve("success");
+			//reject("error");
+			setTimeout(function(){
+				//resolve("success");
+				reject("error");
+			},1000);
+		});
+		console.log(r.tab('e'));
+		p.then(function(e){
+			console.log("执行顺序：2",e);
+			return "this data1.";
+		}).then(function(e){
+			console.log("执行顺序：3",e);
+
+			/*return new Promise(function(resolve, reject){
+				console.log("执行顺序：4");
+				//resolve("success(内部)");
+				//reject("error(内部)");
+				setTimeout(function(){
+					console.log("执行顺序：4-1");
+					resolve("success(内部)");
+					
+					//reject("error(内部)");
+				},2500);
+
+			}).then(function(e){
+				console.log("执行顺序：5",e);
+				return 'this data2.(来自内部then)';
+			})
+			.then(function(e){
+				console.log("执行顺序：5-1",e);
+				return 'this data2-1.(来自内部then)';
+			})
+			.catch(function(e){
+				console.log("执行顺序：5",e);
+				return 'this error.(来自内部then)';
+			});*/
+			var p2 = new Promise(function(resolve, reject){
+				console.log("执行顺序：4");
+				//resolve("success(内部)");
+				//reject("error(内部)");
+				setTimeout(function(){
+					console.log("执行顺序：4-1");
+					resolve("success(内部)");
+					
+					//reject("error(内部)");
+				},2500);
+
+			});
+			p2.then(function(e){
+				console.log("执行顺序：5",e);
+				return 'this data2.(来自内部then)';
+			})
+			.then(function(e){
+				console.log("执行顺序：5-1",e);
+				return 'this data2-1.(来自内部then)';
+			})
+			.catch(function(e){
+				console.log("执行顺序：5",e);
+				return 'this error.(来自内部then)';
+			});
+
+			return p2;
+			//return "this data2.";
+		}).then(function(e){
+			console.log("执行顺序：6",e);
+			return "this data3.";
+		})
+		.then(function(e){
+			console.log("执行顺序：7",e);
+			return "this data4.";
+		})
+		.catch(function(e){
+			//console.log(new Date().getTime());
+			console.log("执行顺序：2",e);
+		});
+		console.log(r.tab('e'));
+		setTimeout(function(){
+			p.then(function(){
+				console.log('新增',arguments,this);
+				return "最后的返回值";
+			})
+		},2000);
+
+
+
+	</script>
+</head>
+<body>
+
+</body>
+</html>
